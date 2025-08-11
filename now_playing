@@ -1,0 +1,37 @@
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+import tkinter as tk
+
+# ---------------- Spotify API Credentials ----------------
+CLIENT_ID = "your-client-id"
+CLIENT_SECRET = "your-client-secret"
+REDIRECT_URI = "http://127.0.0.1:8080/callback"
+
+# ---------------- Spotify Authentication ----------------
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    redirect_uri=REDIRECT_URI,
+    scope="user-read-playback-state user-read-currently-playing"
+))
+
+# ---------------- Tkinter GUI ----------------
+root = tk.Tk()
+root.title("Now Playing")
+
+now_playing_label = tk.Label(root, text="Loading current song...", font=("Arial", 14))
+now_playing_label.pack(pady=20)
+
+def update_now_playing():
+    track = sp.current_playback()
+    if track and track['item']:
+        song_name = track['item']['name']
+        artist_name = track['item']['artists'][0]['name']
+        now_playing_label.config(text=f"Now Playing: {song_name} - {artist_name}")
+    else:
+        now_playing_label.config(text="No song is playing.")
+
+    root.after(5000, update_now_playing)  # refresh every 5 seconds
+
+update_now_playing()
+root.mainloop()
